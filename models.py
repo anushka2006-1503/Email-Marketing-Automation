@@ -55,14 +55,45 @@ def get_contact(contact_id):
 
 def create_contact(name, email, phone, company, notes):
     db = get_db()
+
+    name = name.strip()
+    email = email.strip().lower()
+    phone = phone.strip()
+    company = company.strip()
+    notes = notes.strip()
+
     db.execute(
         """
         INSERT INTO contacts (name, email, phone, company, notes, created_at)
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (name.strip(), email.strip().lower(), phone.strip(), company.strip(), notes.strip(), now_iso()),
+        (name, email, phone, company, notes, now_iso()),
     )
     db.commit()
+
+    # Run active "New Subscriber" automations
+    automations = db.execute(
+        """
+        SELECT subject, message
+        FROM automations
+        WHERE trigger_type = 'New Subscriber'
+          AND active = 1
+        """
+    ).fetchall()
+
+    for automation in automations:
+        body = (
+            automation["message"]
+            .replace("{{name}}", name)
+            .replace("{{email}}", email)
+            .replace("{{company}}", company)
+        )
+
+        send_email(
+            email,
+            automation["subject"],
+            body,
+        )
 
 
 def update_contact(contact_id, name, email, phone, company, notes):
@@ -324,6 +355,32 @@ def dispatch_campaign(campaign_id):
         (now_iso(), sent_count, campaign_id),
     )
 
+    # Run active "Campaign Sent" automations after the campaign is sent.
+    if sent_count > 0:
+        automations = db.execute(
+            """
+            SELECT subject, message
+            FROM automations
+            WHERE trigger_type = 'Campaign Sent'
+              AND active = 1
+            """
+        ).fetchall()
+
+        for automation in automations:
+            for contact in recipients:
+                body = (
+                    automation["message"]
+                    .replace("{{name}}", contact["name"] or "")
+                    .replace("{{email}}", contact["email"] or "")
+                    .replace("{{company}}", contact["company"] or "")
+                )
+
+                send_email(
+                    contact["email"],
+                    automation["subject"],
+                    body,
+                )
+
     db.commit()
 
     return sent_count, len(recipients)
@@ -456,6 +513,73 @@ def analytics_stats():
         "campaign_performance": campaign_performance,
         "subscriber_growth": subscriber_growth,
     }
+
+# --- Scheduled Automations ---
+
+
+def process_scheduled_automations():
+    db = get_db()
+
+    # Make sure scheduling columns exist.
+    columns = db.execute("PRAGMA table_info(automations)").fetchall()
+    column_names = [column["name"] for column in columns]
+
+    if "scheduled_time" not in column_names:
+        db.execute(
+            "ALTER TABLE automations ADD COLUMN scheduled_time TEXT"
+        )
+
+    if "last_run_at" not in column_names:
+        db.execute(
+            "ALTER TABLE automations ADD COLUMN last_run_at TEXT"
+        )
+
+    db.commit()
+
+    current_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
+
+    automations = db.execute(
+        """
+        SELECT id, subject, message, scheduled_time
+        FROM automations
+        WHERE trigger_type = 'Scheduled Time'
+          AND active = 1
+          AND scheduled_time IS NOT NULL
+          AND scheduled_time <= ?
+          AND (last_run_at IS NULL OR last_run_at != scheduled_time)
+        """,
+        (current_time,),
+    ).fetchall()
+
+    contacts = db.execute(
+        "SELECT * FROM contacts ORDER BY id"
+    ).fetchall()
+
+    for automation in automations:
+        for contact in contacts:
+            body = (
+                automation["message"]
+                .replace("{{name}}", contact["name"] or "")
+                .replace("{{email}}", contact["email"] or "")
+                .replace("{{company}}", contact["company"] or "")
+            )
+
+            send_email(
+                contact["email"],
+                automation["subject"],
+                body,
+            )
+
+        db.execute(
+            """
+            UPDATE automations
+            SET last_run_at = ?
+            WHERE id = ?
+            """,
+            (automation["scheduled_time"], automation["id"]),
+        )
+
+    db.commit()
 
 
 

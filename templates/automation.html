@@ -3,26 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automation</title>
+    <title>Email Automation</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
+            margin: 40px;
             background: #f5f6fa;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
         h1 {
-            color: #333;
+            margin-bottom: 10px;
         }
 
-        .card {
+        .form-box, .automation-box {
             background: white;
             padding: 25px;
             margin-top: 20px;
@@ -40,58 +34,195 @@
             width: 100%;
             padding: 10px;
             margin-top: 6px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
             box-sizing: border-box;
         }
 
         button {
-            margin-top: 20px;
-            padding: 12px 20px;
+            margin-top: 10px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 5px;
-            background: #333;
-            color: white;
+            border-radius: 6px;
             cursor: pointer;
         }
 
-        button:hover {
+        .create-btn {
+            background: #222;
+            color: white;
+        }
+
+        .toggle-btn {
             background: #555;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactive {
+            color: red;
+            font-weight: bold;
+        }
+
+        .message {
+            padding: 10px;
+            margin-top: 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 6px;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-
     <h1>⚙️ Email Automation</h1>
+    <p>Create and manage automated email workflows.</p>
 
-    <div class="card">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="form-box">
 
         <h2>Create Automation</h2>
 
-        <label>Automation Name</label>
-        <input type="text" placeholder="Example: Welcome Email">
+        <form method="POST" action="{{ url_for('automation.automation') }}">
 
-        <label>Trigger</label>
-        <select>
-            <option>New Subscriber</option>
-            <option>Campaign Sent</option>
-            <option>Scheduled Time</option>
-        </select>
+            <label>Automation Name</label>
+            <input
+                type="text"
+                name="name"
+                placeholder="Example: Welcome Email"
+                required
+            >
 
-        <label>Email Subject</label>
-        <input type="text" placeholder="Welcome to our newsletter">
+            <label>Trigger</label>
+            <select name="trigger_type">
+                <option value="New Subscriber">New Subscriber</option>
+                <option value="Campaign Sent">Campaign Sent</option>
+                <option value="Scheduled Time">Scheduled Time</option>
+            </select>
 
-        <label>Email Message</label>
-        <textarea rows="6" placeholder="Write your automated email..."></textarea>
+            <label>Scheduled Time</label>
+            <input type="datetime-local" name="schedule_time">
 
-        <button>Create Automation</button>
+            <label>Email Subject</label>
+            <input
+                type="text"
+                name="subject"
+                placeholder="Welcome to our newsletter"
+                required
+            >
+
+            <label>Email Message</label>
+            <textarea
+                name="message"
+                rows="6"
+                placeholder="Write your automated email..."
+                required
+            ></textarea>
+
+            <button type="submit" class="create-btn">
+                Create Automation
+            </button>
+
+        </form>
 
     </div>
 
-</div>
+    <div class="automation-box">
+
+        <h2>Saved Automations</h2>
+
+        {% if automations %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Trigger</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for automation in automations %}
+
+                <tr>
+
+                    <td>{{ automation["name"] }}</td>
+
+                    <td>{{ automation["trigger_type"] }}</td>
+
+                    <td>{{ automation["subject"] }}</td>
+
+                    <td>
+                        {% if automation["active"] %}
+                            <span class="active">Active</span>
+                        {% else %}
+                            <span class="inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <form
+                            method="POST"
+                            action="{{ url_for('automation.toggle_automation', automation_id=automation['id']) }}"
+                        >
+                            <button type="submit" class="toggle-btn">
+                                {% if automation["active"] %}
+                                    Disable
+                                {% else %}
+                                    Enable
+                                {% endif %}
+                            </button>
+                        </form>
+                    </td>
+
+                    <td>{{ automation["created_at"] }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+            <p>No automations created yet.</p>
+
+        {% endif %}
+
+    </div>
 
 </body>
 </html>

@@ -11,6 +11,8 @@ from routes.templates import templates_bp
 from routes.automation import automation_bp
 from routes.tracking import tracking_bp
 from routes.reports import reports_bp
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -24,11 +26,14 @@ def create_app():
     app.register_blueprint(automation_bp)
     app.register_blueprint(tracking_bp)
     app.register_blueprint(reports_bp)
+
     @app.before_request
     def run_scheduler():
         if request.endpoint == "static":
             return
+
         models.process_due_campaigns()
+        models.process_scheduled_automations()
 
     @app.context_processor
     def inject_helpers():
