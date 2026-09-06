@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · EmailFlow{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block subtitle %}Subject, content, recipients, and optional schedule{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <form method="post">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="mb-3">
+          <label class="form-label">Campaign name</label>
+          <input class="form-control" name="name" required value="{{ campaign.name if campaign else '' }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Use a template</label>
+          <select class="form-select" id="templateSelect" name="template_id">
+            <option value="">None</option>
+            {% for template in templates %}
+              <option value="{{ template.id }}" {% if campaign and campaign.template_id == template.id %}selected{% endif %}>{{ template.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Subject</label>
+          <input class="form-control" id="subjectField" name="subject" required value="{{ campaign.subject if campaign else '' }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Content</label>
+          <textarea class="form-control" id="contentField" name="content" rows="10" required>{{ campaign.content if campaign else '' }}</textarea>
+          <div class="form-text">Placeholders: {{"{{name}}"}}, {{"{{email}}"}}, {{"{{company}}"}}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Schedule date and time</label>
+          <input class="form-control" type="datetime-local" name="scheduled_at" value="{{ to_datetime_local(campaign.scheduled_at) if campaign else '' }}">
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <label class="form-label">Recipients</label>
+        <div class="recipient-box">
+          {% if contacts %}
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="selectAll">
+              <label class="form-check-label" for="selectAll">Select all</label>
+            </div>
+            {% for contact in contacts %}
+              <div class="form-check">
+                <input class="form-check-input contact-check" type="checkbox" name="contact_ids" value="{{ contact.id }}" id="c{{ contact.id }}" {% if contact.id in selected_ids %}checked{% endif %}>
+                <label class="form-check-label" for="c{{ contact.id }}">
+                  {{ contact.name }} <span class="text-muted">({{ contact.email }})</span>
+                </label>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted mb-0">Add contacts first so you can choose recipients.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-secondary" type="submit" name="action" value="draft">Save draft</button>
+      <button class="btn btn-warning" type="submit" name="action" value="schedule">Schedule</button>
+      <button class="btn btn-primary" type="submit" name="action" value="send">Send now</button>
+      <a class="btn btn-link" href="{{ url_for('campaigns.list_campaigns') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const selectAll = document.getElementById("selectAll");
+  if (selectAll) {
+    selectAll.addEventListener("change", () => {
+      document.querySelectorAll(".contact-check").forEach((box) => {
+        box.checked = selectAll.checked;
+      });
+    });
+  }
+  const templateSelect = document.getElementById("templateSelect");
+  templateSelect.addEventListener("change", async () => {
+    if (!templateSelect.value) return;
+    const response = await fetch(`/campaigns/template/${templateSelect.value}.json`);
+    if (!response.ok) return;
+    const data = await response.json();
+    document.getElementById("subjectField").value = data.subject || "";
+    document.getElementById("contentField").value = data.content || "";
+  });
+</script>
+{% endblock %}

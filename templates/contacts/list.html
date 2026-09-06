@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Contacts · EmailFlow{% endblock %}
+{% block heading %}Contacts{% endblock %}
+{% block subtitle %}Add, search, and manage your recipient list{% endblock %}
+{% block actions %}
+  <a class="btn btn-primary" href="{{ url_for('contacts.add_contact') }}"><i class="bi bi-person-plus"></i> Add contact</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel mb-3">
+  <form class="row g-2" method="get">
+    <div class="col-md-8">
+      <input class="form-control" type="search" name="q" value="{{ search }}" placeholder="Search by name, email, company, or phone">
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('contacts.list_contacts') }}">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  {% if contacts %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Company</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for contact in contacts %}
+        <tr>
+          <td class="fw-semibold">{{ contact.name }}</td>
+          <td>{{ contact.email }}</td>
+          <td>{{ contact.phone or "—" }}</td>
+          <td>{{ contact.company or "—" }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('contacts.edit_contact', contact_id=contact.id) }}">Edit</a>
+            <form class="d-inline" method="post" action="{{ url_for('contacts.delete_contact', contact_id=contact.id) }}" onsubmit="return confirm('Delete this contact?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty-state">No contacts found. Add your first recipient.</div>
+  {% endif %}
+</div>
+{% endblock %}

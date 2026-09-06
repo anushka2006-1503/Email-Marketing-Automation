@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · EmailFlow{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block subtitle %}Save reusable email copy{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 800px;">
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Template name</label>
+      <input class="form-control" name="name" required value="{{ template.name if template else '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Subject</label>
+      <input class="form-control" name="subject" required value="{{ template.subject if template else '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Content</label>
+      <textarea class="form-control" name="content" rows="10" required>{{ template.content if template else '' }}</textarea>
+      <div class="form-text">Placeholders: {{"{{name}}"}}, {{"{{email}}"}}, {{"{{company}}"}}</div>
+    </div>
+    <button class="btn btn-primary" type="submit">Save template</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('templates_bp.list_templates') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

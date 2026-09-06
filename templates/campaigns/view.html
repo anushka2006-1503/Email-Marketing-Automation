@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }} · EmailFlow{% endblock %}
+{% block heading %}{{ campaign.name }}{% endblock %}
+{% block subtitle %}{{ campaign.subject }}{% endblock %}
+{% block actions %}
+  {% if campaign.status != 'Sent' %}
+    <a class="btn btn-outline-primary" href="{{ url_for('campaigns.edit_campaign', campaign_id=campaign.id) }}">Edit</a>
+    <form class="d-inline" method="post" action="{{ url_for('campaigns.send_campaign', campaign_id=campaign.id) }}">
+      <button class="btn btn-primary" type="submit">Send now</button>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="panel mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="badge rounded-pill badge-{{ campaign.status|lower }}">{{ campaign.status }}</span>
+        <small class="text-muted">Created {{ campaign.created_at }}</small>
+      </div>
+      <p class="mb-1"><strong>Scheduled:</strong> {{ campaign.scheduled_at or "Not scheduled" }}</p>
+      <p class="mb-3"><strong>Emails sent:</strong> {{ campaign.emails_sent }}{% if campaign.sent_at %} on {{ campaign.sent_at }}{% endif %}</p>
+      <h2 class="h6">Content</h2>
+      <div class="border rounded-3 p-3 bg-light" style="white-space: pre-wrap;">{{ campaign.content }}</div>
+    </div>
+    <div class="panel">
+      <h2 class="h5 mb-3">Delivery log</h2>
+      {% if logs %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+            <tr>
+              <td>{{ log.email }}</td>
+              <td>{{ log.status }}</td>
+              <td>{{ log.sent_at }}</td>
+              <td>{{ log.detail }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted mb-0">This campaign has not been sent yet.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <h2 class="h5 mb-3">Recipients ({{ recipients|length }})</h2>
+      <ul class="list-group list-group-flush">
+        {% for contact in recipients %}
+        <li class="list-group-item px-0">
+          <div class="fw-semibold">{{ contact.name }}</div>
+          <small class="text-muted">{{ contact.email }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

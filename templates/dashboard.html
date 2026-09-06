@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · EmailFlow{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block subtitle %}Totals, recent campaigns, and upcoming sends{% endblock %}
+{% block actions %}
+  <a class="btn btn-primary" href="{{ url_for('campaigns.add_campaign') }}"><i class="bi bi-plus-lg"></i> New campaign</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Total contacts</div>
+          <div class="fs-3 fw-semibold">{{ stats.contacts }}</div>
+        </div>
+        <div class="stat-icon bg-indigo"><i class="bi bi-people-fill"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Campaigns</div>
+          <div class="fs-3 fw-semibold">{{ stats.campaigns }}</div>
+        </div>
+        <div class="stat-icon bg-teal"><i class="bi bi-megaphone-fill"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Emails sent</div>
+          <div class="fs-3 fw-semibold">{{ stats.emails_sent }}</div>
+        </div>
+        <div class="stat-icon bg-amber"><i class="bi bi-envelope-check-fill"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Scheduled campaigns</div>
+          <div class="fs-3 fw-semibold">{{ stats.scheduled }}</div>
+        </div>
+        <div class="stat-icon bg-rose"><i class="bi bi-calendar-event-fill"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="panel">
+      <h2 class="h5 mb-3">Recent campaigns</h2>
+      {% if stats.recent %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Recipients</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for campaign in stats.recent %}
+            <tr>
+              <td>{{ campaign.name }}</td>
+              <td>
+                <span class="badge rounded-pill badge-{{ campaign.status|lower }}">{{ campaign.status }}</span>
+              </td>
+              <td>{{ campaign.recipient_count }}</td>
+              <td><a href="{{ url_for('campaigns.view_campaign', campaign_id=campaign.id) }}">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty-state">No campaigns yet. Create one to get started.</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="panel">
+      <h2 class="h5 mb-3">Upcoming scheduled</h2>
+      {% if stats.upcoming %}
+        <ul class="list-group list-group-flush">
+          {% for campaign in stats.upcoming %}
+          <li class="list-group-item px-0 d-flex justify-content-between">
+            <div>
+              <div class="fw-semibold">{{ campaign.name }}</div>
+              <small class="text-muted">{{ campaign.scheduled_at }}</small>
+            </div>
+            <a href="{{ url_for('campaigns.view_campaign', campaign_id=campaign.id) }}">Open</a>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">No campaigns are scheduled.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div class="row g-4 mt-1">
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Emails delivered</div>
+          <div class="fs-3 fw-semibold">{{ analytics.total_sent }}</div>
+        </div>
+        <div class="stat-icon bg-teal"><i class="bi bi-send-check-fill"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Failed emails</div>
+          <div class="fs-3 fw-semibold">{{ analytics.total_failed }}</div>
+        </div>
+        <div class="stat-icon bg-rose"><i class="bi bi-envelope-x-fill"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Delivery rate</div>
+          <div class="fs-3 fw-semibold">{{ analytics.delivery_rate }}%</div>
+        </div>
+        <div class="stat-icon bg-indigo"><i class="bi bi-graph-up-arrow"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Subscribers</div>
+          <div class="fs-3 fw-semibold">{{ analytics.total_contacts }}</div>
+        </div>
+        <div class="stat-icon bg-amber"><i class="bi bi-person-plus-fill"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-4 mt-1">
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Open Rate</div>
+          <div class="fs-3 fw-semibold">{{ analytics.open_rate }}%</div>
+        </div>
+        <div class="stat-icon bg-indigo"><i class="bi bi-envelope-open-fill"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div>
+          <div class="text-muted small">Click Rate</div>
+          <div class="fs-3 fw-semibold">{{ analytics.click_rate }}%</div>
+        </div>
+        <div class="stat-icon bg-teal"><i class="bi bi-cursor-fill"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-4 mt-1">
+  <div class="col-lg-8">
+    <div class="panel">
+      <h2 class="h5 mb-3">Campaign Performance</h2>
+
+      {% if analytics.campaign_performance %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Recipients</th>
+              <th>Sent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for campaign in analytics.campaign_performance %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ campaign.name }}</div>
+                <small class="text-muted">{{ campaign.subject }}</small>
+              </td>
+              <td>
+                <span class="badge rounded-pill badge-{{ campaign.status|lower }}">
+                  {{ campaign.status }}
+                </span>
+              </td>
+              <td>{{ campaign.recipients }}</td>
+              <td>{{ campaign.emails_sent }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty-state">No campaign data available.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="panel">
+      <h2 class="h5 mb-3">Subscriber Growth</h2>
+
+      {% if analytics.subscriber_growth %}
+        {% for item in analytics.subscriber_growth %}
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <span>{{ item.date }}</span>
+          <strong>+{{ item.count }}</strong>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">No subscriber growth data yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>{% endblock %}

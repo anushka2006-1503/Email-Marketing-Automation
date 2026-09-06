@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f6fa;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>⚙️ Email Automation</h1>
+
+    <div class="card">
+
+        <h2>Create Automation</h2>
+
+        <label>Automation Name</label>
+        <input type="text" placeholder="Example: Welcome Email">
+
+        <label>Trigger</label>
+        <select>
+            <option>New Subscriber</option>
+            <option>Campaign Sent</option>
+            <option>Scheduled Time</option>
+        </select>
+
+        <label>Email Subject</label>
+        <input type="text" placeholder="Welcome to our newsletter">
+
+        <label>Email Message</label>
+        <textarea rows="6" placeholder="Write your automated email..."></textarea>
+
+        <button>Create Automation</button>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · EmailFlow{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block subtitle %}Keep recipient details up to date{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 720px;">
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      <input class="form-control" name="name" required value="{{ contact.name if contact else '' }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input class="form-control" type="email" name="email" required value="{{ contact.email if contact else '' }}">
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Phone</label>
+        <input class="form-control" name="phone" value="{{ contact.phone if contact else '' }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Company</label>
+        <input class="form-control" name="company" value="{{ contact.company if contact else '' }}">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notes</label>
+      <textarea class="form-control" name="notes" rows="4">{{ contact.notes if contact else '' }}</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('contacts.list_contacts') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

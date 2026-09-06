@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Report</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="bg-light">
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Campaign Report</h1>
+            <p class="text-muted">
+                Email marketing performance summary
+            </p>
+        </div>
+
+        <button onclick="window.print()" class="btn btn-dark">
+            Print / Save PDF
+        </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Subscribers</h6>
+                    <h2>{{ analytics.total_contacts }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Emails Sent</h6>
+                    <h2>{{ analytics.total_sent }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Delivery Rate</h6>
+                    <h2>{{ analytics.delivery_rate }}%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Open Rate</h6>
+                    <h2>{{ analytics.open_rate }}%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Click Rate</h6>
+                    <h2>{{ analytics.click_rate }}%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Failed Emails</h6>
+                    <h2>{{ analytics.total_failed }}</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Campaign Performance -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h3 class="mb-3">Campaign Performance</h3>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Recipients</th>
+                            <th>Sent</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for campaign in analytics.campaign_performance %}
+                        <tr>
+                            <td>{{ campaign.name }}</td>
+                            <td>{{ campaign.subject }}</td>
+                            <td>{{ campaign.status }}</td>
+                            <td>{{ campaign.recipients }}</td>
+                            <td>{{ campaign.emails_sent }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No campaigns found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Subscriber Growth -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h3 class="mb-3">Subscriber Growth</h3>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>New Subscribers</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in analytics.subscriber_growth %}
+                        <tr>
+                            <td>{{ row.date }}</td>
+                            <td>{{ row.count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                No subscriber data found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

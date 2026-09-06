@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Campaigns · EmailFlow{% endblock %}
+{% block heading %}Campaigns{% endblock %}
+{% block subtitle %}Create, schedule, and send email campaigns{% endblock %}
+{% block actions %}
+  <a class="btn btn-primary" href="{{ url_for('campaigns.add_campaign') }}"><i class="bi bi-plus-lg"></i> New campaign</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  {% if campaigns %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Scheduled</th>
+          <th>Sent</th>
+          <th>Recipients</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for campaign in campaigns %}
+        <tr>
+          <td class="fw-semibold">{{ campaign.name }}</td>
+          <td>{{ campaign.subject }}</td>
+          <td><span class="badge rounded-pill badge-{{ campaign.status|lower }}">{{ campaign.status }}</span></td>
+          <td>{{ campaign.scheduled_at or "—" }}</td>
+          <td>{{ campaign.emails_sent }}</td>
+          <td>{{ campaign.recipient_count }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('campaigns.view_campaign', campaign_id=campaign.id) }}">View</a>
+            {% if campaign.status != 'Sent' %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('campaigns.edit_campaign', campaign_id=campaign.id) }}">Edit</a>
+            {% endif %}
+            <form class="d-inline" method="post" action="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}" onsubmit="return confirm('Delete this campaign?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty-state">No campaigns yet. Create one with a subject, content, and recipient list.</div>
+  {% endif %}
+</div>
+{% endblock %}
